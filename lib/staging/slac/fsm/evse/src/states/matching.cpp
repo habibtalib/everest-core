@@ -140,7 +140,7 @@ FSMSimpleState::HandleEventReturnType MatchingState::handle_event(AllocatorType&
     } else if (ev == Event::MATCH_COMPLETE) {
         // Wait for link up to be confirmed before going to MATCHED state if enabled in config
         if (ctx.slac_config.link_status.do_detect) {
-            return sa.create_simple<WaitForLinkState>(ctx);
+            return sa.create_simple<WaitForLinkState>(ctx, std::move(match_cnf_message));
         } else {
             return sa.create_simple<MatchedState>(ctx);
         }

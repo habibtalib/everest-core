@@ -190,9 +190,9 @@ static bool send_link_status_req(slac::fsm::evse::Context& ctx) {
         slac::messages::lumissil::nscm_get_d_link_status_req link_status_req;
         ctx.send_slac_message(ctx.slac_config.plc_peer_mac, link_status_req);
         return true;
-    } else {
-        return false;
     }
+
+    return false;
 }
 
 void MatchedState::enter() {
@@ -220,20 +220,20 @@ FSMSimpleState::HandleEventReturnType MatchedState::handle_event(AllocatorType& 
 }
 
 FSMSimpleState::CallbackReturnType MatchedState::callback() {
-    const auto& cfg = ctx.slac_config;
+    const auto& link_status = ctx.slac_config.link_status;
 
-    if (not ctx.slac_config.link_status.do_detect) {
+    if (not link_status.do_detect) {
         return {};
     }
 
     if (not link_status_req_sent) {
         link_status_req_sent = send_link_status_req(ctx);
-        return cfg.link_status.poll_in_matched_state_ms;
     } else {
         // Link is confirmed not up yet, query again
         link_status_req_sent = false;
-        return cfg.link_status.poll_in_matched_state_ms;
     }
+
+    return link_status.poll_in_matched_state_ms;
 }
 
 void MatchedState::leave() {
@@ -294,6 +294,11 @@ FSMSimpleState::CallbackReturnType WaitForLinkState::callback() {
     }
 }
 
+WaitForLinkState::WaitForLinkState(Context& ctx,
+                                   std::unique_ptr<slac::messages::cm_slac_match_cnf> sent_match_cnf_message) :
+    FSMSimpleState(ctx), match_cnf_message(std::move(sent_match_cnf_message)) {
+}
+
 bool WaitForLinkState::handle_slac_message(slac::messages::HomeplugMessage& message) {
     const auto mmtype = message.get_mmtype();
 
@@ -306,7 +311,7 @@ bool WaitForLinkState::handle_slac_message(slac::messages::HomeplugMessage& mess
     if (mmtype == (slac::defs::MMTYPE_CM_SLAC_MATCH | slac::defs::MMTYPE_MODE_REQ)) {
         // EV retries MATCH_REQ, so we send the CNF again
         ctx.log_info("Received CM_SLAC_MATCH.REQ retry from EV, sending out CM_SLAC_MATCH.CNF again.");
-        ctx.send_slac_message(message.get_src_mac(), ctx.match_cnf_message);
+        ctx.send_slac_message(message.get_src_mac(), *match_cnf_message);
         return false;
     }
     return false;

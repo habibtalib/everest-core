@@ -213,7 +213,6 @@ struct Context {
     void log_info(const std::string& text);
 
     ModemVendor modem_vendor{ModemVendor::Unknown};
-    slac::messages::cm_slac_match_cnf match_cnf_message;
 
 private:
     const ContextCallbacks& callbacks;
