@@ -7,118 +7,29 @@ namespace module {
 
 static const auto NOTIFICATION_PERIOD = std::chrono::seconds(1);
 
-SessionInfo::SessionInfo() :
-    start_energy_import_wh(0),
-    end_energy_import_wh(0),
-    start_energy_export_wh(0),
-    end_energy_export_wh(0),
-    latest_total_w(0),
+EvSessionInfo::EvSessionInfo() :
     state("Unknown") {
-    this->start_time_point = date::utc_clock::now();
-    this->end_time_point = this->start_time_point;
 }
 
-void SessionInfo::reset() {
+void EvSessionInfo::reset() {
     std::lock_guard<std::mutex> lock(this->session_info_mutex);
     this->state = "Unknown";
-    this->start_energy_import_wh = 0;
-    this->end_energy_import_wh = 0;
-    this->start_energy_export_wh = 0;
-    this->end_energy_export_wh = 0;
-    this->start_time_point = date::utc_clock::now();
-    this->latest_total_w = 0;
-    this->permanent_fault = false;
 }
 
-static void remove_error_from_list(std::vector<module::SessionInfo::Error>& list, const std::string& error_type) {
-    list.erase(std::remove_if(list.begin(), list.end(),
-                              [error_type](const module::SessionInfo::Error& err) { return err.type == error_type; }),
-               list.end());
-}
-
-void SessionInfo::update_state(const std::string& event) {
+void EvSessionInfo::update_state(const std::string& event) {
     std::lock_guard<std::mutex> lock(this->session_info_mutex);
     this->state = event;
 }
 
-void SessionInfo::set_start_energy_import_wh(int32_t start_energy_import_wh) {
-    std::lock_guard<std::mutex> lock(this->session_info_mutex);
-    this->start_energy_import_wh = start_energy_import_wh;
-    this->end_energy_import_wh = start_energy_import_wh;
-    this->start_time_point = date::utc_clock::now();
-    this->end_time_point = this->start_time_point;
-}
-
-void SessionInfo::set_end_energy_import_wh(int32_t end_energy_import_wh) {
-    std::lock_guard<std::mutex> lock(this->session_info_mutex);
-    this->end_energy_import_wh = end_energy_import_wh;
-    this->end_time_point = date::utc_clock::now();
-}
-
-void SessionInfo::set_latest_energy_import_wh(int32_t latest_energy_wh) {
-}
-
-void SessionInfo::set_start_energy_export_wh(int32_t start_energy_export_wh) {
-    std::lock_guard<std::mutex> lock(this->session_info_mutex);
-    this->start_energy_export_wh = start_energy_export_wh;
-    this->end_energy_export_wh = start_energy_export_wh;
-    this->start_energy_export_wh_was_set = true;
-}
-
-void SessionInfo::set_end_energy_export_wh(int32_t end_energy_export_wh) {
-    std::lock_guard<std::mutex> lock(this->session_info_mutex);
-    this->end_energy_export_wh = end_energy_export_wh;
-    this->end_energy_export_wh_was_set = true;
-}
-
-void SessionInfo::set_latest_energy_export_wh(int32_t latest_export_energy_wh) {
-    std::lock_guard<std::mutex> lock(this->session_info_mutex);
-}
-
-void SessionInfo::set_latest_total_w(double latest_total_w) {
-    std::lock_guard<std::mutex> lock(this->session_info_mutex);
-    this->latest_total_w = latest_total_w;
-}
-
-void SessionInfo::set_enable_disable_source(const std::string& active_source, const std::string& active_state,
-                                            const int active_priority) {
-    std::lock_guard<std::mutex> lock(this->session_info_mutex);
-    this->active_enable_disable_source = active_source;
-    this->active_enable_disable_state = active_state;
-    this->active_enable_disable_priority = active_priority;
-}
-
-static void to_json(json& j, const SessionInfo::Error& e) {
-    j = json{{"type", e.type}, {"description", e.description}, {"severity", e.severity}};
-}
-
-SessionInfo::operator std::string() {
+EvSessionInfo::operator std::string() {
     std::lock_guard<std::mutex> lock(this->session_info_mutex);
 
-    auto charged_energy_wh = this->end_energy_import_wh - this->start_energy_import_wh;
-    int32_t discharged_energy_wh{0};
-    if ((this->start_energy_export_wh_was_set == true) && (this->end_energy_export_wh_was_set == true)) {
-        discharged_energy_wh = this->end_energy_export_wh - this->start_energy_export_wh;
-    }
     auto now = date::utc_clock::now();
-
-    auto charging_duration_s =
-        std::chrono::duration_cast<std::chrono::seconds>(this->end_time_point - this->start_time_point);
 
     json session_info = json::object({
         {"state", this->state},
-        {"permanent_fault", this->permanent_fault},
-        {"charged_energy_wh", charged_energy_wh},
-        {"discharged_energy_wh", discharged_energy_wh},
-        {"latest_total_w", this->latest_total_w},
-        {"charging_duration_s", charging_duration_s.count()},
         {"datetime", Everest::Date::to_rfc3339(now)},
     });
-
-    json active_disable_enable = json::object({{"source", this->active_enable_disable_source},
-                                               {"state", this->active_enable_disable_state},
-                                               {"priority", this->active_enable_disable_priority}});
-    session_info["active_enable_disable_source"] = active_disable_enable;
 
     return session_info.dump();
 }
@@ -130,7 +41,7 @@ void EvAPI::init() {
     std::string var_ev_connectors = this->api_base + "ev_connectors";
 
     for (auto& ev : this->r_ev_manager) {
-        auto& session_info = this->info.emplace_back(std::make_unique<SessionInfo>());
+        auto& session_info = this->info.emplace_back(std::make_unique<EvSessionInfo>());
         std::string ev_base = this->api_base + ev->module_id;
         ev_connectors.push_back(ev->module_id);
 

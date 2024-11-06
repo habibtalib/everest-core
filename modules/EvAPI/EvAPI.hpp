@@ -32,55 +32,19 @@ namespace module {
 
 class LimitDecimalPlaces;
 
-class SessionInfo {
+class EvSessionInfo {
 public:
-    SessionInfo();
-
-    struct Error {
-        std::string type;
-        std::string description;
-        std::string severity;
-    };
-
-    bool start_energy_export_wh_was_set{
-        false}; ///< Indicate if start export energy value (optional) has been received or not
-    bool end_energy_export_wh_was_set{
-        false}; ///< Indicate if end export energy value (optional) has been received or not
+    EvSessionInfo();
 
     void reset();
     void update_state(const std::string& event);
-    void set_start_energy_import_wh(int32_t start_energy_import_wh);
-    void set_end_energy_import_wh(int32_t end_energy_import_wh);
-    void set_latest_energy_import_wh(int32_t latest_energy_wh);
-    void set_start_energy_export_wh(int32_t start_energy_export_wh);
-    void set_end_energy_export_wh(int32_t end_energy_export_wh);
-    void set_latest_energy_export_wh(int32_t latest_export_energy_wh);
-    void set_latest_total_w(double latest_total_w);
-    void set_enable_disable_source(const std::string& active_source, const std::string& active_state,
-                                   const int active_priority);
-    void set_permanent_fault(bool f) {
-        permanent_fault = f;
-    }
 
     /// \brief Converts this struct into a serialized json object
     operator std::string();
 
 private:
     std::mutex session_info_mutex;
-    int32_t start_energy_import_wh; ///< Energy reading (import) at the beginning of this charging session in Wh
-    int32_t end_energy_import_wh;   ///< Energy reading (import) at the end of this charging session in Wh
-    int32_t start_energy_export_wh; ///< Energy reading (export) at the beginning of this charging session in Wh
-    int32_t end_energy_export_wh;   ///< Energy reading (export) at the end of this charging session in Wh
-    std::chrono::time_point<date::utc_clock> start_time_point; ///< Start of the charging session
-    std::chrono::time_point<date::utc_clock> end_time_point;   ///< End of the charging session
-    double latest_total_w;                                     ///< Latest total power reading in W
-
     std::string state = "Unknown";
-
-    std::string active_enable_disable_source{"Unspecified"};
-    std::string active_enable_disable_state{"Enabled"};
-    int active_enable_disable_priority{0};
-    bool permanent_fault{false};
 };
 } // namespace module
 // ev@4bf81b14-a215-475c-a1d3-0a484ae48918:v1
@@ -127,9 +91,7 @@ private:
     std::vector<std::thread> api_threads;
     bool running = true;
 
-    std::list<std::unique_ptr<SessionInfo>> info;
-    std::list<std::string> hw_capabilities_str;
-    std::string selected_protocol;
+    std::list<std::unique_ptr<EvSessionInfo>> info;
 
     const std::string api_base = "everest_api/";
     // ev@211cfdbe-f69a-4cd6-a4ec-f8aaa3d1b6c8:v1
