@@ -3,10 +3,6 @@ description: >-
   charging logic of the ev side
 cmds: {}
 vars:
-  session_event:
-    description: Emits all events related to sessions
-    type: object
-    $ref: /evse_manager#/SessionEvent
   ev_info:
     description: More details about the EV if available
     type: object
