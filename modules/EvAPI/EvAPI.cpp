@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright 2020 - 2022 Pionix GmbH and Contributors to EVerest
+// Copyright Pionix GmbH and Contributors to EVerest
 #include "EvAPI.hpp"
 #include <utils/date.hpp>
-#include <utils/yaml_loader.hpp>
 
 namespace module {
 
@@ -153,7 +152,6 @@ void EvAPI::init() {
         });
 
         std::string var_datetime = var_base + "datetime";
-        std::string var_logging_path = var_base + "logging_path";
         this->api_threads.push_back(std::thread([this, var_datetime, var_session_info, &session_info]() {
             auto next_tick = std::chrono::steady_clock::now();
             while (this->running) {
