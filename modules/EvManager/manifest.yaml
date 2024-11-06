@@ -24,6 +24,10 @@ config:
       Simulation commands, e.g. sleep 1;iec_wait_pwr_ready;sleep 1;draw_power_regulated 16,3;sleep 30;unplug
     type: string
     default: ""
+  ac_nominal_voltage:
+    description: Nominal AC voltage between phase and neutral in Volt
+    type: number
+    default: 230
   dc_max_current_limit:
     description: Maximum current allowed by the EV
     type: integer

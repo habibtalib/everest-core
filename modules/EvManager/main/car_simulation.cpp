@@ -109,13 +109,13 @@ void CarSimulation::simulate_soc() {
     double power = 0.0;
     types::evse_manager::EVInfo ev_info;
     if (charge_ac) {
-        charge_v = 230.0;
+        charge_voltage_v = config.ac_nominal_voltage;
         if (charge_three_phase) {
-            power = charge_a * charge_v * 3.0;
+            power = charge_current_a * charge_voltage_v * 3.0;
         } else {
-            power = charge_a * charge_v;
+            power = charge_current_a * charge_voltage_v;
         }
-        ev_info.target_current = charge_a;
+        ev_info.target_current = charge_current_a;
         ev_info.target_voltage = 0;
     } else {
         power = config.dc_target_current * config.dc_target_voltage;
@@ -166,8 +166,8 @@ bool CarSimulation::iso_wait_pwm_is_running(const CmdArguments& arguments) {
 }
 
 bool CarSimulation::draw_power_regulated(const CmdArguments& arguments) {
-    r_ev_board_support->call_set_ac_max_current(std::stod(arguments[0]));
-    charge_a = std::stod(arguments[0]);
+    charge_current_a = std::stod(arguments[0]);
+    r_ev_board_support->call_set_ac_max_current(charge_current_a);
     if (arguments[1] == constants::THREE_PHASES) {
         r_ev_board_support->call_set_three_phases(true);
         charge_ac = true;
@@ -182,8 +182,8 @@ bool CarSimulation::draw_power_regulated(const CmdArguments& arguments) {
 }
 
 bool CarSimulation::draw_power_fixed(const CmdArguments& arguments) {
-    r_ev_board_support->call_set_ac_max_current(std::stod(arguments[0]));
-    charge_a = std::stod(arguments[0]);
+    charge_current_a = std::stod(arguments[0]);
+    r_ev_board_support->call_set_ac_max_current(charge_current_a);
     if (arguments[1] == constants::THREE_PHASES) {
         r_ev_board_support->call_set_three_phases(true);
         charge_ac = true;
@@ -286,8 +286,8 @@ bool CarSimulation::iso_start_v2g_session(const CmdArguments& arguments, bool th
 }
 
 bool CarSimulation::iso_draw_power_regulated(const CmdArguments& arguments) {
-    r_ev_board_support->call_set_ac_max_current(std::stod(arguments[0]));
-    charge_a = std::stod(arguments[0]);
+    charge_current_a = std::stod(arguments[0]);
+    r_ev_board_support->call_set_ac_max_current(charge_current_a);
     if (arguments[1] == constants::THREE_PHASES) {
         r_ev_board_support->call_set_three_phases(true);
         charge_ac = true;
