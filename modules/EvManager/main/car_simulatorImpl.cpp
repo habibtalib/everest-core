@@ -247,9 +247,8 @@ void car_simulatorImpl::subscribe_to_variables_on_init() {
 
     // subscribe EVInfo
     using types::evse_manager::EVInfo;
-    mod->r_ev_board_support->subscribe_ev_info([this](const auto& ev_info) {
-        mod->p_ev_manager->publish_ev_info(ev_info);
-    });
+    mod->r_ev_board_support->subscribe_ev_info(
+        [this](const auto& ev_info) { mod->p_ev_manager->publish_ev_info(ev_info); });
 
     // subscribe slac_state
     if (!mod->r_slac.empty()) {

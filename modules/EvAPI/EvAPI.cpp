@@ -7,8 +7,7 @@ namespace module {
 
 static const auto NOTIFICATION_PERIOD = std::chrono::seconds(1);
 
-EvSessionInfo::EvSessionInfo() :
-    state("Unknown") {
+EvSessionInfo::EvSessionInfo() : state("Unknown") {
 }
 
 void EvSessionInfo::reset() {
