@@ -113,7 +113,6 @@ SessionInfo::operator std::string() {
         {"latest_total_w", this->latest_total_w},
         {"charging_duration_s", charging_duration_s.count()},
         {"datetime", Everest::Date::to_rfc3339(now)},
-
     });
 
     json active_disable_enable = json::object({{"source", this->active_enable_disable_source},
@@ -127,14 +126,13 @@ SessionInfo::operator std::string() {
 void EvAPI::init() {
     invoke_init(*p_main);
 
-    std::vector<std::string> connectors;
-    std::string var_connectors = this->api_base + "connectors";
+    std::vector<std::string> ev_connectors;
+    std::string var_ev_connectors = this->api_base + "ev_connectors";
 
     for (auto& ev : this->r_ev_manager) {
         auto& session_info = this->info.emplace_back(std::make_unique<SessionInfo>());
-        auto& hw_caps = this->hw_capabilities_str.emplace_back("");
         std::string ev_base = this->api_base + ev->module_id;
-        connectors.push_back(ev->module_id);
+        ev_connectors.push_back(ev->module_id);
 
         // API variables
         std::string var_base = ev_base + "/var/";
@@ -168,11 +166,11 @@ void EvAPI::init() {
         std::string cmd_base = ev_base + "/cmd/";
     }
 
-    this->api_threads.push_back(std::thread([this, var_connectors, connectors]() {
+    this->api_threads.push_back(std::thread([this, var_ev_connectors, ev_connectors]() {
         auto next_tick = std::chrono::steady_clock::now();
         while (this->running) {
-            json connectors_array = connectors;
-            this->mqtt.publish(var_connectors, connectors_array.dump());
+            json ev_connectors_array = ev_connectors;
+            this->mqtt.publish(var_ev_connectors, ev_connectors_array.dump());
 
             next_tick += NOTIFICATION_PERIOD;
             std::this_thread::sleep_until(next_tick);
