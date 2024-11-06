@@ -232,6 +232,7 @@ void car_simulatorImpl::subscribe_to_variables_on_init() {
             set_execution_active(false);
             car_simulation->set_state(SimState::UNPLUGGED);
         }
+        mod->p_ev_manager->publish_bsp_event(bsp_event);
     });
 
     // subscribe bsp_measurement
@@ -244,9 +245,6 @@ void car_simulatorImpl::subscribe_to_variables_on_init() {
         }
     });
 
-    using types::board_support_common::BspEvent;
-    mod->r_ev_board_support->subscribe_bsp_event(
-        [this](const auto& bsp_event) { mod->p_ev_manager->publish_bsp_event(bsp_event); });
 
     // subscribe slac_state
     if (!mod->r_slac.empty()) {
