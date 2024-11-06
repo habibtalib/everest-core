@@ -86,7 +86,7 @@ provides:
     description: This implements the car simulator
   ev_manager:
     interface: ev_manager
-    description: TODO
+    description: Implementation of the ev manager to provide additional information such as detailed EV info
 requires:
   ev_board_support:
     interface: ev_board_support
