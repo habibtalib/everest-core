@@ -31,5 +31,11 @@ target_sources(${MODULE_NAME}
 )
 
 # ev@c55432ab-152c-45a9-9d2e-7281d50c69c3:v1
-# insert other things like install cmds etc here
+
+install(FILES
+            libnfc-nci_config/libnfc-nxp.conf
+            libnfc-nci_config/libnfc-nci.conf
+        DESTINATION
+	    "${LIBNFCNCI_CONFIG_INSTALL_PATH}")
+
 # ev@c55432ab-152c-45a9-9d2e-7281d50c69c3:v1
