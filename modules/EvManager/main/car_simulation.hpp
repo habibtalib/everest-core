@@ -113,8 +113,13 @@ private:
     const module::Conf& config;
     std::chrono::time_point<std::chrono::steady_clock> timepoint_last_update;
     double charge_current_a{0};
-    bool charge_ac{false};
-    bool charge_three_phase{false};
+
+    enum class ChargeMode {
+        None,
+        AC,
+        ACThreePhase,
+        DC,
+    } charge_mode{ChargeMode::None};
 
     const std::unique_ptr<ev_board_supportIntf>& r_ev_board_support;
     const std::vector<std::unique_ptr<ISO15118_evIntf>>& r_ev;
