@@ -28,23 +28,25 @@
 #include <date/date.h>
 #include <date/tz.h>
 
+#include <generated/types/board_support_common.hpp>
+
 namespace module {
 
 class LimitDecimalPlaces;
 
 class EvSessionInfo {
 public:
-    EvSessionInfo();
+    EvSessionInfo(){};
 
     void reset();
-    void update_state(const std::string& event);
+    void update_event(const types::board_support_common::Event& event);
 
     /// \brief Converts this struct into a serialized json object
     operator std::string();
 
 private:
     std::mutex session_info_mutex;
-    std::string state = "Unknown";
+    std::optional<types::board_support_common::Event> event;
 };
 } // namespace module
 // ev@4bf81b14-a215-475c-a1d3-0a484ae48918:v1

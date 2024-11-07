@@ -7,26 +7,28 @@ namespace module {
 
 static const auto NOTIFICATION_PERIOD = std::chrono::seconds(1);
 
-EvSessionInfo::EvSessionInfo() : state("Unknown") {
-}
-
 void EvSessionInfo::reset() {
     std::lock_guard<std::mutex> lock(this->session_info_mutex);
-    this->state = "Unknown";
+    this->event = std::nullopt;
 }
 
-void EvSessionInfo::update_state(const std::string& event) {
+void EvSessionInfo::update_event(const types::board_support_common::Event& event) {
     std::lock_guard<std::mutex> lock(this->session_info_mutex);
-    this->state = event;
+    this->event = event;
 }
 
 EvSessionInfo::operator std::string() {
     std::lock_guard<std::mutex> lock(this->session_info_mutex);
 
-    auto now = date::utc_clock::now();
+    const auto now = date::utc_clock::now();
+
+    std::string state = "Unknown";
+    if (this->event.has_value()) {
+        state = types::board_support_common::event_to_string(this->event.value());
+    }
 
     json session_info = json::object({
-        {"state", this->state},
+        {"state", state},
         {"datetime", Everest::Date::to_rfc3339(now)},
     });
 
@@ -55,7 +57,7 @@ void EvAPI::init() {
 
         std::string var_session_info = var_base + "session_info";
         ev->subscribe_bsp_event([this, var_session_info, &session_info](const auto& bsp_event) {
-            session_info->update_state(types::board_support_common::event_to_string(bsp_event.event));
+            session_info->update_event(bsp_event.event);
             this->mqtt.publish(var_session_info, *session_info);
         });
 
