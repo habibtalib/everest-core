@@ -6,6 +6,8 @@
 
 #include <everest/logging.hpp>
 
+constexpr double MS_FACTOR = (1.0 / 60.0 / 60.0 / 1000.0);
+
 void CarSimulation::state_machine() {
     using types::ev_board_support::EvCpState;
 
@@ -102,10 +104,10 @@ void CarSimulation::state_machine() {
 };
 
 void CarSimulation::simulate_soc() {
-    double ms =
+    const double ms =
         std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - timepoint_last_update)
             .count();
-    double factor = (1.0 / 60.0 / 60.0 / 1000.0) * ms;
+    const double factor = MS_FACTOR * ms;
     double power = 0.0;
     types::evse_manager::EVInfo ev_info;
     if (charge_ac) {
