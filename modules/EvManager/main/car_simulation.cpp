@@ -109,11 +109,10 @@ void CarSimulation::simulate_soc() {
     double power = 0.0;
     types::evse_manager::EVInfo ev_info;
     if (charge_ac) {
-        charge_voltage_v = config.ac_nominal_voltage;
         if (charge_three_phase) {
-            power = charge_current_a * charge_voltage_v * 3.0;
+            power = charge_current_a * config.ac_nominal_voltage * 3.0;
         } else {
-            power = charge_current_a * charge_voltage_v;
+            power = charge_current_a * config.ac_nominal_voltage;
         }
         ev_info.target_current = charge_current_a;
         ev_info.target_voltage = 0;

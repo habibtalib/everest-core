@@ -113,7 +113,6 @@ private:
     const module::Conf& config;
     std::chrono::time_point<std::chrono::steady_clock> timepoint_last_update;
     double charge_current_a{0};
-    double charge_voltage_v{0};
     bool charge_ac{false};
     bool charge_three_phase{false};
 
