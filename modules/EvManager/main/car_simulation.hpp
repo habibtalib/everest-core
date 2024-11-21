@@ -24,8 +24,8 @@ public:
         r_ev(r_ev_),
         r_slac(r_slac_),
         p_ev_manager(p_ev_manager_),
-        config(config_) {
-        timepoint_last_update = std::chrono::steady_clock::now();
+        config(config_),
+        timepoint_last_update(std::chrono::steady_clock::now()) {
     };
     ~CarSimulation() = default;
 
