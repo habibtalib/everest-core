@@ -25,8 +25,7 @@ public:
         r_slac(r_slac_),
         p_ev_manager(p_ev_manager_),
         config(config_),
-        timepoint_last_update(std::chrono::steady_clock::now()) {
-    };
+        timepoint_last_update(std::chrono::steady_clock::now()){};
     ~CarSimulation() = default;
 
     void reset() {
